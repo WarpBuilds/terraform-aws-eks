@@ -469,3 +469,26 @@ resource "aws_autoscaling_schedule" "this" {
   # Cron examples: https://crontab.guru/examples.html
   recurrence = try(each.value.recurrence, null)
 }
+
+resource "aws_autoscaling_group" "ng" {
+
+  name = aws_eks_node_group.this[0].resources[0].autoscaling_groups[0].name
+
+  default_cooldown = 60
+
+  max_size = var.max_size
+  min_size = var.min_size
+  desired_capacity = var.desired_size
+
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to the desired_capacity, min_size, or max_size
+      # as these will be managed by the aws_eks_node_group resource
+      #
+      max_size,
+      min_size,
+      desired_capacity,
+    ]
+  }
+
+}
